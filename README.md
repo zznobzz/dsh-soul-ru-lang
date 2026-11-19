@@ -77,6 +77,27 @@ node scripts/embed-dict.mjs                                      # rebuild the e
 `ru.json` is the source of truth; `client.js` carries an embedded copy because the client
 bundle is loaded as a plain script (no JSON `require` at runtime).
 
+## Publishing (maintainers)
+
+npm releases are produced by GitHub Actions; no manual `npm publish` is needed.
+
+1. Add the token once: repository **Settings → Secrets and variables → Actions → New repository
+   secret**, name `NPM_TOKEN`, value an npm automation (or granular) token that may publish
+   `dsh-soul-ru-lang` without a 2FA prompt.
+2. Bump `version` in `package.json`, commit, then push a matching tag:
+
+   ```bash
+   git tag v0.1.0
+   git push origin v0.1.0
+   ```
+
+3. `.github/workflows/publish.yml` verifies that the tag matches `package.json`, prints the tarball
+   contents (`npm pack --dry-run`) and runs `npm publish --provenance --access public` with
+   `NODE_AUTH_TOKEN` from the `NPM_TOKEN` secret.
+
+Provenance attestation requires the repository to stay public and the workflow to keep
+`id-token: write`.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
