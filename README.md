@@ -98,6 +98,12 @@ npm releases are produced by GitHub Actions; no manual `npm publish` is needed.
 Provenance attestation requires the repository to stay public and the workflow to keep
 `id-token: write`.
 
+If the publish step fails with `EOTP` (“This operation requires a one-time password”), the
+`NPM_TOKEN` secret is a token that still asks for 2FA. Create an npm **Automation** token
+(npmjs.com → Access Tokens → Generate New Token → Classic → Automation) or a granular token
+with 2FA bypass, publish permission for `dsh-soul-ru-lang`, and update the secret; then re-run
+the workflow (Actions → Publish to npm → Run workflow) — no new tag is needed.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
