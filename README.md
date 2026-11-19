@@ -98,11 +98,24 @@ npm releases are produced by GitHub Actions; no manual `npm publish` is needed.
 Provenance attestation requires the repository to stay public and the workflow to keep
 `id-token: write`.
 
-If the publish step fails with `EOTP` (“This operation requires a one-time password”), the
-`NPM_TOKEN` secret is a token that still asks for 2FA. Create an npm **Automation** token
-(npmjs.com → Access Tokens → Generate New Token → Classic → Automation) or a granular token
-with 2FA bypass, publish permission for `dsh-soul-ru-lang`, and update the secret; then re-run
-the workflow (Actions → Publish to npm → Run workflow) — no new tag is needed.
+Two failure modes are worth knowing:
+
+- `EOTP` (“This operation requires a one-time password”): the `NPM_TOKEN` secret holds a token
+  that still asks for 2FA. Use an npm **Automation** token (Access Tokens → Generate New Token →
+  Classic → Automation) or a granular token with 2FA bypass for `dsh-soul-ru-lang`, then re-run
+  the workflow (Actions → Publish to npm → Run workflow) — no new tag is needed.
+- Publish “succeeds” but the registry shows only `0.0.0-stage` with the description “Temporary
+  package placeholder for staged publishing”: npm now **stages** publishes made with 2FA-bypass
+  tokens. Approve it once with a maintainer account (2FA prompt):
+
+  ```bash
+  npm stage approve dsh-soul-ru-lang@0.1.0
+  ```
+
+  or open the package's **Publish requests** page on npmjs.com and approve there. To avoid the
+  staged flow entirely, configure a **Trusted Publisher** for this package (npmjs.com → package →
+  Settings → Trusted Publisher → GitHub Actions, repository `zznobzz/dsh-soul-ru-lang`, workflow
+  `publish.yml`); then the workflow can publish over OIDC without `NPM_TOKEN`.
 
 ## License
 
