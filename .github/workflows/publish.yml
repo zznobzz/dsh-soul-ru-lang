@@ -1,0 +1,52 @@
+name: Publish to npm
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write   # required for npm provenance attestation
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: Check the package manifest
+        run: |
+          node -e '
+            const p = require("./package.json");
+            if (p.name !== "dsh-soul-ru-lang") { console.error("unexpected package name:", p.name); process.exit(1); }
+            const want = ["index.js","client.js","cordis.patch.yml","ru.json","README.md","LICENSE","scripts/check-keys.mjs","scripts/embed-dict.mjs"];
+            const files = Array.isArray(p.files) ? p.files : [];
+            const missing = want.filter((f) => !files.includes(f));
+            if (missing.length) { console.error("files[] is missing:", missing.join(", ")); process.exit(1); }
+            if (!p.dsh || !p.dsh.bundle || !p.dsh.bundle.patch) { console.error("dsh.bundle.patch is required"); process.exit(1); }
+            console.log("manifest ok:", p.name, p.version);
+          '
+
+      - name: Tag must match package.json version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg="$(node -p "require('./package.json').version")"
+          if [ "$tag" != "$pkg" ]; then
+            echo "tag v$tag does not match package.json version $pkg" >&2
+            exit 1
+          fi
+
+      - name: Inspect the tarball
+        run: npm pack --dry-run
+
+      - name: Publish with provenance
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
