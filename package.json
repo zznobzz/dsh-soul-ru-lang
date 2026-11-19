@@ -1,0 +1,34 @@
+{
+  "name": "dsh-soul-ru-lang",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Russian UI language pack (client overlay) for the dsh-soul personalization plugin: 401 locale keys under the 'soul' namespace.",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/zznobzz/dsh-soul-ru-lang.git" },
+  "homepage": "https://github.com/zznobzz/dsh-soul-ru-lang#readme",
+  "bugs": { "url": "https://github.com/zznobzz/dsh-soul-ru-lang/issues" },
+  "keywords": ["dsh", "dsh-plugin", "dsh-soul", "locale", "russian", "ru"],
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "ru.json",
+    "README.md",
+    "LICENSE",
+    "scripts/check-keys.mjs",
+    "scripts/embed-dict.mjs"
+  ],
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": {
+      "platform": "web",
+      "inject": ["@deepseek-ai/dsh-client-locale"]
+    }
+  }
+}
